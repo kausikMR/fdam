@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fdam/mail_verification_page.dart';
 import 'package:fdam/models/bank_account.dart';
 import 'package:fdam/utils/my_future_builder.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
@@ -21,28 +24,100 @@ class FaceSignInPage extends StatefulWidget {
 class _FaceSignInPageState extends State<FaceSignInPage> {
   bool _faceDetected = false;
 
+  late final CollectionReference<BankAccount> _bankReference;
+  late final StreamSubscription<DatabaseEvent> _signalSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _bankReference = FirebaseFirestore.instance
+        .collection('/${widget.bank.name}')
+        .withConverter<BankAccount>(
+            fromFirestore: (snap, _) => BankAccount.fromMap(snap.data()!),
+            toFirestore: (account, _) => account.toMap());
+
+    /// <-- Signal listener
+    _signalSubscription =
+        FirebaseDatabase.instance.ref('face_detected').onValue.listen((event) {
+      debugPrint("FACE_DETECTED: ${event.snapshot.value}");
+      final faceDetected =
+          event.snapshot.value == null ? false : event.snapshot.value as bool;
+      if (faceDetected) {
+        _onSignalDetected();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _signalSubscription.cancel();
+    super.dispose();
+  }
+
+  void _onSignalDetected() async {
+    final accounts = await _bankReference
+        .get()
+        .then((value) => value.docs.map((e) => e.data()).toList());
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AccountDetailsPage(
+          account: accounts.first,
+        ),
+      ),
+    );
+  }
+
+  Future<BankAccount?> getBankAccountFromFace(Face face) async {
+    final accounts = await FirebaseFirestore.instance
+        .collection('/${widget.bank.name}')
+        .withConverter<BankAccount>(
+            fromFirestore: (snap, _) => BankAccount.fromMap(snap.data()!),
+            toFirestore: (account, _) => account.toMap())
+        .get()
+        .then(
+          (value) => value.docs
+              .map(
+                (e) => e.data(),
+              )
+              .toList(),
+        );
+
+    // for (final account in accounts) {
+    //   final comparableFace = _mlService.getComparableFace(face);
+    //   if (comparableFace.compare(account.face, 999, 1.5)) {
+    //     return account;
+    //   }
+    // }
+    debugPrint('No accounts matched');
+    return null;
+  }
+
   void _onFacesDetected(List<Face> faces) async {
     if (_faceDetected) return;
     _faceDetected = true;
+    _showSnack('Face detected');
+    // final accounts = await _bankReference
+    //     .get()
+    //     .then((value) => value.docs.map((e) => e.data()).toList());
+    // if (!mounted) return;
+    // Navigator.of(context).push(MaterialPageRoute(
+    //     builder: (_) => AccountDetailsPage(account: accounts.first)));
 
-    FirebaseFirestore.instance.collection('/${widget.bank.name}').get().then(
-      (value) {
-        final bankAccount = BankAccount.fromMap(value.docs[0].data());
-        debugPrint("bankAccount: ${bankAccount.toMap()}");
-        if (!mounted) return;
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => AccountDetailsPage(account: bankAccount),
-          ),
-        );
-      },
-    ).onError(
-      (error, stackTrace) {
-        _showSnack('No account found for this bank');
-        debugPrint('error: $error');
-        debugPrint('stackTrace: $stackTrace');
-      },
-    );
+    // final account = await getBankAccountFromFace(faces.first);
+    // if (account != null) {
+    //   if (!mounted) return;
+    //   _showSnack('Welcome ${account.holderName}');
+    //   Navigator.of(context).push(
+    //     MaterialPageRoute(
+    //       builder: (context) => AccountDetailsPage(
+    //         account: account,
+    //       ),
+    //     ),
+    //   );
+    // } else {
+    //   _showSnack('Bank account not found');
+    // }
   }
 
   void _showSnack(String message) {
@@ -108,13 +183,8 @@ class FaceDetectionCamera extends StatefulWidget {
 class _FaceDetectionCameraState extends State<FaceDetectionCamera> {
   late final Future<List<CameraDescription>> _camerasFuture;
   CameraController? _cameraController;
-  List<Face> facesDetected = [];
 
   late final FaceDetector _faceDetector;
-
-  void onImage(CameraImage image) {
-    // _faceDetector.processImage(image);
-  }
 
   InputImageRotation rotationIntToImageRotation(int rotation) {
     switch (rotation) {
@@ -130,37 +200,31 @@ class _FaceDetectionCameraState extends State<FaceDetectionCamera> {
   }
 
   Future<void> detectFacesFromImage(CameraImage image) async {
-    // InputImageData firebaseImageMetadata = InputImageData(
-    //   imageRotation: rotationIntToImageRotation(
-    //     _cameraController!.description.sensorOrientation,
-    //   ),
-    //   inputImageFormat: InputImageFormat.bgra8888,
-    //   size: Size(image.width.toDouble(), image.height.toDouble()),
-    //   planeData: image.planes.map(
-    //     (Plane plane) {
-    //       return InputImagePlaneMetadata(
-    //         bytesPerRow: plane.bytesPerRow,
-    //         height: plane.height,
-    //         width: plane.width,
-    //       );
-    //     },
-    //   ).toList(),
-    // );
+    InputImageData firebaseImageMetadata = InputImageData(
+      imageRotation: rotationIntToImageRotation(
+        _cameraController!.description.sensorOrientation,
+      ),
+      inputImageFormat: InputImageFormat.bgra8888,
+      size: Size(image.width.toDouble(), image.height.toDouble()),
+      planeData: image.planes.map(
+        (Plane plane) {
+          return InputImagePlaneMetadata(
+            bytesPerRow: plane.bytesPerRow,
+            height: plane.height,
+            width: plane.width,
+          );
+        },
+      ).toList(),
+    );
 
-    // InputImage firebaseVisionImage = InputImage.fromBytes(
-    //   bytes: image.planes[0].bytes,
-    //   inputImageData: firebaseImageMetadata,
-    // );
-    await Future.delayed(const Duration(seconds: 2));
-    widget.onFacesDetected.call([]);
+    InputImage firebaseVisionImage = InputImage.fromBytes(
+      bytes: image.planes[0].bytes,
+      inputImageData: firebaseImageMetadata,
+    );
     // final List<Face> faces =
-    //     // await _faceDetector.processImage(firebaseVisionImage);
+    //     await _faceDetector.processImage(firebaseVisionImage);
     // if (faces.isNotEmpty) {
     //   widget.onFacesDetected.call(faces);
-    //   facesDetected = faces;
-    //   // faces detected
-    //   final lastFace = facesDetected.last;
-    //   lastFace;
     // }
   }
 
@@ -195,7 +259,7 @@ class _FaceDetectionCameraState extends State<FaceDetectionCamera> {
             );
           }
           _cameraController ??= CameraController(
-            cameras.last,
+            cameras[1],
             ResolutionPreset.veryHigh,
           );
           final isInitialized = _cameraController!.value.isInitialized;

@@ -1,4 +1,5 @@
 import 'package:fdam/enums.dart';
+import 'package:fdam/utils/comparable_face.dart';
 import 'package:flutter/material.dart';
 
 @immutable
@@ -13,6 +14,7 @@ class BankAccount {
     this.balance = 0.0,
     required this.password,
     required this.pin,
+    required this.face,
   });
 
   final Bank bank;
@@ -24,6 +26,7 @@ class BankAccount {
   final double balance;
   final String password;
   final int pin;
+  final ComparableFace face;
 
   Map<String, dynamic> toMap() {
     return {
@@ -36,6 +39,7 @@ class BankAccount {
       'balance': balance,
       'password': password,
       'pin': pin,
+      'face_data': face.toMap(),
     };
   }
 
@@ -52,6 +56,7 @@ class BankAccount {
       holderName: map['holderName'],
       balance: double.tryParse(map['balance'].toString()) ?? 0.0,
       pin: map['pin'],
+      face: ComparableFace.fromMap(map['face_data']),
     );
   }
 }

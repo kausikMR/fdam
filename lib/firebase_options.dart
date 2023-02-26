@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '454237222673',
     projectId: 'fdam-e699b',
     authDomain: 'fdam-e699b.firebaseapp.com',
+    databaseURL: 'https://fdam-e699b-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'fdam-e699b.appspot.com',
     measurementId: 'G-97KTNHH3XL',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:454237222673:android:3d137b9547a3763bec7eb0',
     messagingSenderId: '454237222673',
     projectId: 'fdam-e699b',
+    databaseURL: 'https://fdam-e699b-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'fdam-e699b.appspot.com',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:454237222673:ios:f126befc9391d2a0ec7eb0',
     messagingSenderId: '454237222673',
     projectId: 'fdam-e699b',
+    databaseURL: 'https://fdam-e699b-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'fdam-e699b.appspot.com',
     iosClientId: '454237222673-ag93ujno7bc8hr66tqr2fikn43764qsk.apps.googleusercontent.com',
     iosBundleId: 'com.example.fdam',
@@ -76,6 +79,7 @@ class DefaultFirebaseOptions {
     appId: '1:454237222673:ios:f126befc9391d2a0ec7eb0',
     messagingSenderId: '454237222673',
     projectId: 'fdam-e699b',
+    databaseURL: 'https://fdam-e699b-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'fdam-e699b.appspot.com',
     iosClientId: '454237222673-ag93ujno7bc8hr66tqr2fikn43764qsk.apps.googleusercontent.com',
     iosBundleId: 'com.example.fdam',

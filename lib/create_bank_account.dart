@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fdam/enums.dart';
+import 'package:fdam/utils/comparable_face.dart';
 import 'package:fdam/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -83,6 +84,7 @@ class _CreateBankAccountPageState extends State<CreateBankAccountPage> {
       holderName: holderName,
       password: password,
       pin: pin,
+      face: const ComparableFace([]),
     );
 
     FirebaseFirestore.instance
