@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "454237222673",
+    "project_id": "fdam-e699b",
+    "storage_bucket": "fdam-e699b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454237222673:android:3d137b9547a3763bec7eb0",
+        "android_client_info": {
+          "package_name": "com.example.fdam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "454237222673-ul9qatjohjet70ihra5theb0o39uakcf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNXuUpMLmxIlsYRyMtnem5IixbFbgxeKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "454237222673-ul9qatjohjet70ihra5theb0o39uakcf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
